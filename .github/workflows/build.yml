@@ -1,0 +1,20 @@
+name: Build TWRP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build TWRP
+        uses: PBRP/Action-TWRP@main
+        with:
+          MANIFEST_BRANCH: twrp-11
+          DEVICE_TREE: https://github.com/Blazespireyt/android_device_archos_ac70cr3gv2
+          DEVICE_PATH: device/archos/ac70cr3gv2
+          DEVICE_NAME: ac70cr3gv2

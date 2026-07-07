@@ -8,24 +8,35 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Clone minimal manifest
+      - name: Install packages
         run: |
-          git clone --depth=1 -b twrp-11 https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git twrp
+          sudo apt update
+          sudo apt install -y repo git python3 bc bison build-essential ccache curl flex g++-multilib gcc-multilib git-core gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+
+      - name: Initialize source
+        run: |
+          mkdir twrp
+          cd twrp
+          repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-7.1
+
+      - name: Sync source
+        run: |
+          cd twrp
+          repo sync -j4
 
       - name: Copy device tree
         run: |
           mkdir -p twrp/device/archos
-          cp -r . twrp/device/archos/ac70cr3gv2
+          rsync -av --exclude=.git ./ twrp/device/archos/ac70cr3gv2/
 
       - name: Build
         run: |
           cd twrp
           source build/envsetup.sh
           lunch omni_ac70cr3gv2-eng
-          mka recoveryimage
+          make recoveryimage -j$(nproc)
 
       - name: Upload
         uses: actions/upload-artifact@v4
